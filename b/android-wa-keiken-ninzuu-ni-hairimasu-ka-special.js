@@ -1,1 +1,0 @@
-window.__TKA__=window.__TKA__||{};window.__TKA__["android-wa-keiken-ninzuu-ni-hairimasu-ka-special"]=[];

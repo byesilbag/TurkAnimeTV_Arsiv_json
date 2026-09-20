@@ -1,1 +1,0 @@
-window.__TKA__=window.__TKA__||{};window.__TKA__["kimi-to-koete-koi-ni-naru"]=[];

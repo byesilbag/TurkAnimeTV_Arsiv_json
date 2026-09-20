@@ -1,1 +1,0 @@
-window.__TKA__=window.__TKA__||{};window.__TKA__["rekishi-ni-nokoru-akujo-ni-naru-zo"]=[];

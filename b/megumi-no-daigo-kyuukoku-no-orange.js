@@ -1,1 +1,0 @@
-window.__TKA__=window.__TKA__||{};window.__TKA__["megumi-no-daigo-kyuukoku-no-orange"]=[];

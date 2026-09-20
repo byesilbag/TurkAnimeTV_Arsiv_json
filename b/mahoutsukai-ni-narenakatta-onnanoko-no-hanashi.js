@@ -1,1 +1,0 @@
-window.__TKA__=window.__TKA__||{};window.__TKA__["mahoutsukai-ni-narenakatta-onnanoko-no-hanashi"]=[];

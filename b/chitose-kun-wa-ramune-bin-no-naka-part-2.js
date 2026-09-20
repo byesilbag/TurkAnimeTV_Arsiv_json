@@ -1,1 +1,0 @@
-window.__TKA__=window.__TKA__||{};window.__TKA__["chitose-kun-wa-ramune-bin-no-naka-part-2"]=[];

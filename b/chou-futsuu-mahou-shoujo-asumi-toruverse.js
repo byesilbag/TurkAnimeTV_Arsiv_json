@@ -1,1 +1,0 @@
-window.__TKA__=window.__TKA__||{};window.__TKA__["chou-futsuu-mahou-shoujo-asumi-toruverse"]=[];

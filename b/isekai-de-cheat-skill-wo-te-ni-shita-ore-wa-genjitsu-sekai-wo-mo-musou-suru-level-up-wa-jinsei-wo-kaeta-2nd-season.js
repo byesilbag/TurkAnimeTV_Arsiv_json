@@ -1,1 +1,0 @@
-window.__TKA__=window.__TKA__||{};window.__TKA__["isekai-de-cheat-skill-wo-te-ni-shita-ore-wa-genjitsu-sekai-wo-mo-musou-suru-level-up-wa-jinsei-wo-kaeta-2nd-season"]=[];

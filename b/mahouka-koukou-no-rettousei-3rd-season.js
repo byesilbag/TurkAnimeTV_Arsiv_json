@@ -1,1 +1,0 @@
-window.__TKA__=window.__TKA__||{};window.__TKA__["mahouka-koukou-no-rettousei-3rd-season"]=[];

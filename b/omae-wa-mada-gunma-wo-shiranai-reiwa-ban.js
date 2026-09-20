@@ -1,1 +1,0 @@
-window.__TKA__=window.__TKA__||{};window.__TKA__["omae-wa-mada-gunma-wo-shiranai-reiwa-ban"]=[];
