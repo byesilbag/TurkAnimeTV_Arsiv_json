@@ -345,33 +345,39 @@ function fsSafe(s){ return String(s||'').replace(/[\\/:*?"<>|`$!\x00-\x1f]/g,'_'
 /* URL'yi çift tırnak içinde güvenle kullanmak için: " ` $ \ ! boşluk ve kontrol karakterlerini %XX yap */
 function safeArg(u){ return String(u||'').replace(/[\x00-\x20"`$\\!]/g, c=>'%'+c.charCodeAt(0).toString(16).toUpperCase().padStart(2,'0')); }
 function bolumBase(ep){ return ep.no!=null ? String(ep.no)+'. Bolum' : fsSafe(ep.slug); }
+function isSibnet(l){ return /sibnet/i.test(l.player||'') || /sibnet\.ru/i.test(l.url||''); }
+/* indirme sırası: canlı sibnet > diğer canlı > ölü sibnet > diğer ölü */
+function sibnetOnce(ls){
+  const r = l=> (l.durum==='olu'?2:0) + (isSibnet(l)?0:1);
+  return ls.slice().sort((a,b)=> r(a)-r(b));
+}
 function firstUrlLink(ep){
   const ls = kaldirilanFiltre(ep.links).filter(l=> l.tip==='url');
-  return ls.find(l=> l.durum!=='olu') || ls[0] || null;   // canlı tercih edilir
+  return sibnetOnce(ls)[0] || null;   // canlı sibnet varsa her zaman o
 }
 function ytCmd(url, outName){ return 'yt-dlp "'+safeArg(url)+'" -o "'+fsSafe(outName)+'"'; }
 function buildIndirScripts(slug, data, tumu){
   const rows = data.map(ep=>({ep, links: kaldirilanFiltre(ep.links).filter(l=>l.tip==='url')}))
                    .filter(x=> x.links.length);
-  const b = ['@echo off','chcp 65001 >nul','rem TurkAnime Arsiv - '+slug,
-             'rem yt-dlp gerekli: https://github.com/yt-dlp/yt-dlp',
-             'rem kaldirilan linkler bu betikte yok','cd /d "%~dp0"',''];
-  const s = ['#!/usr/bin/env bash','# TurkAnime Arsiv - '+slug,
-             '# yt-dlp gerekli: https://github.com/yt-dlp/yt-dlp','# set -e',''];
+  const s = ['#!/usr/bin/env bash',
+             '# TurkAnime Arsiv - '+slug,
+             '# yt-dlp gerekli: https://github.com/yt-dlp/yt-dlp',
+             '# kaldirilan linkler bu betikte yok',
+             '# Kullanim: chmod +x indir-'+fsSafe(slug)+'.sh && ./indir-'+fsSafe(slug)+'.sh',
+             'cd "$(dirname "$0")" || exit 1',
+             'command -v yt-dlp >/dev/null 2>&1 || { echo "yt-dlp bulunamadi: https://github.com/yt-dlp/yt-dlp" >&2; exit 1; }',
+             ''];
   for (const {ep, links} of rows){
     const base = bolumBase(ep);
-    const kullan = tumu ? links : [firstUrlLink(ep)];
+    const kullan = tumu ? sibnetOnce(links) : [firstUrlLink(ep)];
     kullan.forEach((l,i)=>{
       let nm = base;
       if (tumu && i>0) nm = base+' ('+fsSafe(l.player)+')';
-      const u = safeArg(l.url);
-      const urlB = u.replace(/%/g,'%%');   // bat %% kuralı
-      b.push('yt-dlp "'+urlB+'" -o "'+nm+'.mp4"');
-      s.push('yt-dlp "'+u+'" -o "'+nm+'.mp4"');
+      s.push('yt-dlp "'+safeArg(l.url)+'" -o "'+nm+'.mp4"');
     });
   }
-  b.push('','pause');
-  return { bat: b.join('\r\n')+'\r\n', sh: s.join('\n')+'\n' };
+  s.push('', 'echo "Bitti."');
+  return { sh: s.join('\n')+'\n' };
 }
 function indirFile(name, content, mime){
   const blob = new Blob([content], {type: mime||'text/plain;charset=utf-8'});
@@ -562,7 +568,7 @@ function renderAnime(slug, data){
       <button class="btn" id="indirBtn">⬇ Animeyi indir</button>
       <label class="tgl"><input type="checkbox" id="tumTgl"> tüm fansub/seçenekler</label>
       <label class="tgl"><input type="checkbox" id="oluTgl" ${olu?'checked':''}> ölüleri göster</label>
-      <span style="color:var(--tx3);font-size:12px">bat + sh üretir (yt-dlp)</span>
+      <span style="color:var(--tx3);font-size:12px">.sh üretir (yt-dlp) — <code>chmod +x</code> gerekir</span>
     </div>
     ${data.length?`
       <div id="eplist">${slice.map(epRow).join('')}</div>
@@ -577,8 +583,7 @@ function renderAnime(slug, data){
     const tt = $('#tumTgl');
     const tumu = !!(tt && tt.checked);
     const sc = buildIndirScripts(slug, data, tumu);
-    indirFile('indir-'+slug+'.bat', sc.bat);
-    setTimeout(()=> indirFile('indir-'+slug+'.sh', sc.sh, 'text/x-shellscript;charset=utf-8'), 350);
+    indirFile('indir-'+fsSafe(slug)+'.sh', sc.sh, 'text/x-shellscript;charset=utf-8');
     flashDone(ib, 'indirildi ✓', 1600, '⬇ Animeyi indir');
   };
   appEl().querySelectorAll('.ep').forEach(el=>{
